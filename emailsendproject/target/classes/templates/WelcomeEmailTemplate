@@ -1,0 +1,4 @@
+Hello #[payload.name],#[message.inboundProperties.tes]
+You have just submitted file: #[payload.fileName].
+Have a great day.
+#[flowVars.test]

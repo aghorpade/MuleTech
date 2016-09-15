@@ -1,0 +1,58 @@
+#%RAML 0.8
+#baseUri: https://hasbc.com
+baseUri: https://mocksvc.mulesoft.com/mocks/8183ed99-99b7-4393-a561-f8f0baa62836
+title: User Registration
+version: 1.0
+
+schemas: 
+- userregistration: |
+    {  
+      "$schema": "http://json-schema.org/draft-04/schema", 
+      "type": "object", 
+      "description": "User registration details", 
+      "properties": {
+        "first-name": {
+          "description": "Denotes user's first name",
+          "type": "string",
+          "maxLength": 20
+        },
+        "last-name": {
+          "description": "Denotes user's last name",
+          "type": "string",
+          "maxLength": 20
+        },
+        "email-id": {
+          "description": "Denotes user's primary email address",
+          "type": "string"
+        },
+        "age": {
+          "description": "Denotes user's age.",
+          "type": "integer",
+          "maximum": 150,
+          "minimum": 1 
+        }
+      },
+      "required" : ["first-name","last-name","email-id"]
+    }
+        
+/user-registration:
+  displayName: User Registration
+  post:
+    description: Request
+    body:
+      application/json:
+        schema: userregistration
+        example: |
+          {
+            "first-name": "amit",
+            "last-name": "ghorpade",
+            "email-id": "ghorpade.a.g@gmail.com",
+            "age": 12
+          }
+    responses:
+      200:
+        description: OK  
+      400:
+        description: Bad request
+      500:
+        description: Internal Server Error - An error occurred on the server when attempting to satisfy the request.

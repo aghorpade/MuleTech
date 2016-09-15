@@ -1,0 +1,6 @@
+Welcome ${firstname}
+
+This is amit send email with velocity template example demo.
+
+Regards,
+Amit Ghorpade

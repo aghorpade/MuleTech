@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:smtps="http://www.mulesoft.org/schema/mule/smtps"
+	xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:smtp="http://www.mulesoft.org/schema/mule/smtp"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:cmis="http://www.mulesoft.org/schema/mule/cmis"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:core="http://www.mulesoft.org/schema/mule/core"
+	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/smtps http://www.mulesoft.org/schema/mule/smtps/current/mule-smtps.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/cmis http://www.mulesoft.org/schema/mule/cmis/1.1/mule-cmis.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.5.xsd
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/smtp http://www.mulesoft.org/schema/mule/smtp/current/mule-smtp.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/3.0/mule-vm.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd">
+    <beans:beans>
+        <beans:bean name="velocityEngine" class="org.springframework.ui.velocity.VelocityEngineFactoryBean">
+            <beans:property name="resourceLoaderPath" value="classpath:templates"/>
+        </beans:bean>
+    </beans:beans>
+	
+	<http:listener-config name="HTTP_Listener_Configuration"
+		host="localhost" port="8090" doc:name="HTTP Listener Configuration" />
+	<smtp:gmail-connector name="Gmail" contentType="text/html"
+		fromAddress="xxxx" replyToAddresses="xxxx"
+		subject="this is test message" validateConnections="true" doc:name="Gmail" />
+	<flow name="emailsendprojectFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="/send" doc:name="HTTP" />
+		<logger message="Incoming request. #[message] #[payload]"
+			level="INFO" doc:name="Logger" />
+			<custom-transformer class="emailsendproject.VelocityMessageTransformer" doc:name="Java">
+		<spring:property name="velocityEngine" ref="velocityEngine" />
+		<spring:property name="templateName" value="WelcomeEmail.vm" />
+	</custom-transformer>
+        <flow-ref name="emailsendprojectSub_Flow" doc:name="emailsendprojectSub_Flow"/>
+		<logger message="outgoing response" level="INFO" doc:name="Logger" />
+	</flow>
+    <sub-flow name="emailsendprojectSub_Flow">
+     <async doc:name="Async">
+			<smtp:outbound-endpoint host="smtp.gmail.com"
+				port="587" user="xxx" password="xxxxx"
+				to="xxxxx" from="xxxxx" subject="Welcome to mulesoft world"
+				responseTimeout="10000" doc:name="SMTP" />
+		</async> 
+    </sub-flow>
+    <flow name="emailsendprojectFlow1">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/parser" doc:name="HTTP"/>
+        <json:json-to-object-transformer returnClass="java.util.Map" doc:name="JSON to Object"/>
+        <set-variable variableName="test" value="amit" doc:name="Variable"/>
+        <parse-template location="D:\Amit\mulesft workspace\Munit\emailsendproject\src\main\resources\templates\WelcomeEmailTemplate" doc:name="Parse Template"/>
+        <flow-ref name="emailsendprojectSub_Flow" doc:name="emailsendprojectSub_Flow"/>
+    </flow>
+</mule>
